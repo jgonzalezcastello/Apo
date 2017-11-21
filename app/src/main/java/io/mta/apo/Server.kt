@@ -20,14 +20,17 @@ import org.json.JSONStringer
 class Server {
 
     // API constants
-    val SERVER_URL = "http://mata.io/"
+    val SERVER_URL = "http://138.68.251.88/"
     val API = "api/"
-    val API_VERSION = "1"
+    val API_VERSION = "1/"
+    val PILL="pill/"
+    val SEARCH = "search?"
 
     // query constants
-    val SHAPE = "shape"
-    val IMPRINT = "imprint"
-    val COLOR = "color"
+    val MEDICINE_NAME = "medicine_name="
+    val SHAPE = "shape="
+    val IMPRINT = "imprint="
+    val COLOR = "color="
 
     // okhttp constants
     val JSON:MediaType = MediaType.parse("application/json; charset=utf-8")!! // converts nullable to non-nullable, throws nullpointererror is null
@@ -51,11 +54,46 @@ class Server {
         val request_body: RequestBody = RequestBody.create(JSON, json.toString())
         val request: Request = Request.Builder()
                 .url(getAPIUrl())
-                .post(request_body)
                 .build()
         val response = client.newCall(request).execute()
 
         return response.body()!!.string()
+    }
+
+    /**Constructs url to search for pill with specified parameters
+     * @param {string} name - The name associated with the pill
+     * @param {string} imprint - The imprint on the pill
+     * @param {string} color - The color on the pill
+     */
+    fun getPillSearchUrl(name:String,imprint: String,color: String):String{
+        var url = getAPIUrl() + PILL + SEARCH
+        if(!name.isEmpty()){
+            url += MEDICINE_NAME + name
+        }
+        if(!imprint.isEmpty()){
+            url += IMPRINT + imprint
+        }
+        if(!color.isEmpty()){
+            url += COLOR + color
+        }
+        Log.i("Server:getPillSearchURL","URL Built: "+url)
+        return url;
+    }
+
+    /**Submits an information request to the data server
+     * @param {string} name - The name associated with the pill
+     * @param {string} imprint - The imprint on the pill
+     * @param {string} color - The color on the pill
+     */
+    fun queryServerPillOption(name:String, imprint:String, color:String):String{
+        Log.i("Server::queryPillServer","queryPillServer called")
+
+        val request: Request = Request.Builder()
+                .url(getPillSearchUrl(name,imprint,color))
+                .build()
+        val response = client.newCall(request).execute()
+
+        return response.body()!!.string();
     }
 
 }
